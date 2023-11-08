@@ -1,6 +1,6 @@
 use axum::{
     routing::get,
-    // response::Response,
+    response::Response,
     Router,
 };
 use axum_prometheus::PrometheusMetricLayer;
@@ -23,8 +23,9 @@ use tracing_subscriber::{
     },
     Layer
 };
-// use std::time::Duration;
-// use tracing::Span;
+use std::time::Duration;
+use axum::body::BoxBody;
+use tracing::Span;
 // use http::{Response};
 // use hyper::body::Body;
 // use tracing_subscriber::fmt::writer::MakeWriterExt;
@@ -78,12 +79,12 @@ async fn main() {
             ServiceBuilder::new()
                 .layer(
                     TraceLayer::new_for_http()
-                        // .on_response(|response: &Response, latency: Duration, _span: &Span| {
-                        //     tracing::info!("response generated in {:?}", latency)
-                        // })
-                        .on_response(DefaultOnResponse::new()
-                            .level(Level::INFO)
-                            .latency_unit(LatencyUnit::Micros))
+                        .on_response(|response: &Response<BoxBody>, latency: Duration, _span: &Span| {
+                            tracing::info!("response generated in {:?}", latency)
+                        })
+                        // .on_response(DefaultOnResponse::new()
+                        //     .level(Level::DEBUG)
+                        //     .latency_unit(LatencyUnit::Micros))
                 )
                 .layer(prometheus_layer)
         )
@@ -99,3 +100,4 @@ async fn main() {
 async fn hello_world() -> &'static str {
     "Hello World!"
 }
+
